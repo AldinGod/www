@@ -1,0 +1,151 @@
+<div class="container mt-3">
+  <div>
+    <table class="table table-striped" id="film-performance">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Category ID</th>
+          <th>Category name</th>
+          <th>Total number of moview</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="text-center">
+            <div class="btn-group" role="group">
+              <button
+                type="button"
+                class="btn btn-warning"
+                onclick="FilmService.edit_film(1)"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="FilmService.delete_film(1)"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+          <td>1</td>
+          <td>Action</td>
+          <td>64</td>
+        </tr>
+        <tr>
+          <td class="text-center">
+            <div class="btn-group" role="group">
+              <button
+                type="button"
+                class="btn btn-warning"
+                onclick="FilmService.edit_film(2)"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="FilmService.delete_film(2)"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+          <td>2</td>
+          <td>Animation</td>
+          <td>66</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<!--TODO add modal with edit film form properties -->
+<div class="modal fade" id="edit-film-modal" tabindex="-1" aria-labelledby="editFilmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editFilmModalLabel">Edit Film</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-film-form">
+          <div class="mb-3">
+            <label for="film-title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="film-title" name="title">
+          </div>
+          <div class="mb-3">
+            <label for="film-description" class="form-label">Description</label>
+            <textarea class="form-control" id="film-description" name="description"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="film-release-year" class="form-label">Release Year</label>
+            <input type="number" class="form-control" id="film-release-year" name="release_year">
+          </div>
+          <button type="button" class="btn btn-primary" onclick="FilmService.save_changes()">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* 
+    1. Populate the table with id `film-performance` with the data returned
+       from the database. It does not have to be paginated. (5 points)
+    2. Implement the delete logic in the predefined function. (5 points)
+    3. When Edit button is clicked
+      a. fetch the film with clicked id from database (backend) (5 points)
+      b. populate the modal (id `edit-film-modal`) form with data returned from the backend (5 points)
+      d. when user clicks "Save changes" button in the modal persist changes
+         for that film in the database (10 points)
+   */
+  
+  loadFilms();
+
+  function loadFilms() {
+      $.ajax({
+        url: '../backend/rest/film/performance',
+        type: 'GET',
+        success: function(response) {
+          const tableBody = $('#film-performance tbody');
+          tableBody.empty();
+          response.forEach(film => {
+            tableBody.append(`
+              <tr>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-warning" onclick="edit_film(${film.id})">Edit</button>
+                    <button type="button" class="btn btn-danger" onclick="delete_film(${film.id})">Delete</button>
+                  </div>
+                </td>
+                <td>${film.id}</td>
+                <td>${film.name}</td>
+                <td>${film.total}</td>
+              </tr>
+            `);
+          });
+        },
+        error: function(xhr, status, error) {
+          toastr.error('Failed to load films');
+        }
+      });
+    }
+  
+  function delete_film(film_id) {
+      $.ajax({
+        url: `../backend/rest/film/delete/${film_id}`,
+        type: 'DELETE',
+        success: function(response) {
+          toastr.success(response.message);
+          loadFilms();
+        },
+        error: function(xhr, status, error) {
+          toastr.error('Failed to delete film');
+        }
+      });
+    }
+
+</script>
